@@ -4,14 +4,42 @@
 import csv
 import os
 import glob
+import dicom
 
 
-IMAGEMALE = '../IMAGE/DX 胸片 男/'
-IMAGEFEMALE = '../IMAGE/DX 胸片 女/'
+IMAGEMALE = '../IMAGE/DX_male/'
+IMAGEFEMALE = '../IMAGE/DX_female/'
 
 
 LOG = open('preprocess.log', 'w')
 
+
+def find_postero(prefix, img_list):
+    '''
+    find the positive images in a list
+    return index if found -1 otherwise
+    '''
+    flag = False
+    for i in range(len(img_list)):
+        if '.dcm' in img_list[i].lower():
+            img_path = os.path.join(prefix, img_list[i])
+            # print img_path
+            ref = dicom.read_file(img_path)
+            if hasattr(ref, 'ViewPosition') and ref.ViewPosition == 'PA':
+                flag = True
+            if hasattr(ref, 'AcquisitionDeviceProcessingDescription') \
+                    and 'postero' in ref.AcquisitionDeviceProcessingDescription:
+                flag = True
+        if flag == True:
+            return i
+        i += 1
+
+    if flag == False:
+        return -1
+
+
+global num_mulimage
+num_mulimage = 0
 
 def find_record(name):
     '''
@@ -44,8 +72,19 @@ def find_record(name):
         LOG.write('Image folder is empty: ' + prefix + '\n')
         return ''
 
-    path = os.path.join(prefix, images[0])
+    idx = 0
+    if len(images) > 1:
+        idx = find_postero(prefix, images)
+        global num_mulimage
+        num_mulimage += 1
+
+    if idx == -1:
+        LOG.write('No postero image found: ' + prefix + '\n')
+        return ''
+
+    path = os.path.join(prefix, images[idx])
     return path
+
 
 global num_total
 num_total = 0
@@ -151,11 +190,13 @@ if __name__ == '__main__':
             print "number of female samples: ", num_female
             print "number of positive samples: ", num_pos
             print "number of negative samples: ", num_neg
+            print "number of case with multiple images: ", num_mulimage
 
             LOG.write("number of total samples in records.csv: %d\n" %num_total)
             LOG.write("number of male samples: %d\n" %num_male)
             LOG.write("number of female samples: %d\n" %num_female)
             LOG.write("number of positive samples: %d\n" %num_pos)
             LOG.write("number of negative samples: %d\n" %num_neg)
+            LOG.write("number of case with multiple images: %d\n" %num_mulimage)
 
     LOG.close()
