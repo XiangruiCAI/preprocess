@@ -112,8 +112,11 @@ def remove_duplicate(meta_path):
 if __name__ == '__main__':
     with open('./meta_full_final.csv', 'w') as o1, \
             open('./meta_final.csv', 'w') as o2:
+        header = ['path', 'label', 'IID', 'gender']
         out1 = csv.writer(o1, delimiter = ' ')
         out2 = csv.writer(o2, delimiter = ' ')
+        out1.writerow(header)
+        out2.writerow(header[:2])
         meta_dict = remove_duplicate('./meta_full.csv')
         num_pos = 0
         num_neg = 0

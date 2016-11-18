@@ -1,6 +1,7 @@
 # Preprocessing scripts to generate meta data for the healthcare images
 ## run
-first `python preprocessing.py` then `python combine.py`
+First `python preprocessing.py` then `python combine.py`
+
 *PLEASE USE meta_final.csv and meta_full_final.csv AS THE INPUT FOR THE FOLLOW UP WORK!*
 
 ## preprocessing.py
@@ -16,4 +17,5 @@ first `python preprocessing.py` then `python combine.py`
 ## combine.py
 Add iamges that are found manually into the final list
 * input: meta_full.csv and manually.csv
+* output: meta_final.csv and meta_full_final.csv, both are the corresponding files to the output of preprocessing.py
 
