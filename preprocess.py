@@ -12,6 +12,7 @@ IMAGEFEMALE = '../IMAGE/DX_female/'
 
 
 LOG = open('preprocess.log', 'w')
+NOPA = open('nopa.log', 'w')
 
 
 def find_postero(prefix, img_list):
@@ -38,8 +39,10 @@ def find_postero(prefix, img_list):
         return -1
 
 
-global num_mulimage
-num_mulimage = 0
+global num_missing
+num_missing = 0
+global num_nopa
+num_nopa = 0
 
 def find_record(name):
     '''
@@ -65,21 +68,24 @@ def find_record(name):
             prefix = f_cand[0]
         else:
             LOG.write('Image folder not found: ' + name + '\n')
+            global num_missing
+            num_missing += 1
             return ''
 
     images = os.listdir(prefix)
     if len(images) == 0:
-        LOG.write('Image folder is empty: ' + prefix + '\n')
+        LOG.write('Image folder is empty: ' + prefix[3:] + '\n')
         return ''
 
     idx = 0
     if len(images) > 1:
         idx = find_postero(prefix, images)
-        global num_mulimage
-        num_mulimage += 1
 
     if idx == -1:
-        LOG.write('No postero image found: ' + prefix + '\n')
+        LOG.write('Postero image not found: ' + prefix[3:] + '\n')
+        NOPA.write(prefix[3:] + '\n')
+        global num_nopa
+        num_nopa += 1
         return ''
 
     path = os.path.join(prefix, images[idx])
@@ -185,18 +191,26 @@ if __name__ == '__main__':
             print "Error!"
         else:
             #global num_total
+            print "==================================================="
             print "number of total samples in records.csv: ", num_total
+            print "number of missing folder: ", num_missing
+            print "number of no PA: ", num_nopa
+            print "---------------------------------------------------"
             print "number of male samples: ", num_male
             print "number of female samples: ", num_female
             print "number of positive samples: ", num_pos
             print "number of negative samples: ", num_neg
-            print "number of case with multiple images: ", num_mulimage
+            print "==================================================="
 
+            LOG.write("===================================================\n")
             LOG.write("number of total samples in records.csv: %d\n" %num_total)
+            LOG.write("number of missing folder: %d\n" %num_missing)
+            LOG.write("number of no PA: %d\n" %num_nopa)
+            LOG.write("---------------------------------------------------\n")
             LOG.write("number of male samples: %d\n" %num_male)
             LOG.write("number of female samples: %d\n" %num_female)
             LOG.write("number of positive samples: %d\n" %num_pos)
             LOG.write("number of negative samples: %d\n" %num_neg)
-            LOG.write("number of case with multiple images: %d\n" %num_mulimage)
+            LOG.write("===================================================\n")
 
     LOG.close()
